@@ -1,0 +1,44 @@
+# Gradle
+.gradle/
+**/build/
+
+# Java and IDE
+.idea/
+.vscode/
+.settings/
+*.iml
+.classpath
+.project
+out/
+bin/
+
+# Local dependencies and iFlow deployment artifacts
+**/libs/*.jar
+iflow/resources/*.jar
+
+# Local configuration and credentials
+.env
+.env.*
+!**/.env.example
+*.local.properties
+local.properties
+*.jks
+*.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+hs_err_pid*
+replay_pid*
+
+# Local GitHub tooling output
+.github/modernize/
+
+# Operating system files
+.DS_Store
+Thumbs.db

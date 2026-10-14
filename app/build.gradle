@@ -1,0 +1,72 @@
+plugins {
+    id 'java-library'
+    id 'com.gradleup.shadow' version '9.6.1'
+}
+
+repositories {
+    mavenCentral()
+}
+
+def adapterApiVersion = providers.gradleProperty('adapterApiVersion').get()
+
+dependencies {
+    compileOnly "com.sap.cloud.adk:adapter.api:${adapterApiVersion}"
+    compileOnly 'org.apache.groovy:groovy-json:4.0.29'
+
+    implementation 'org.postgresql:postgresql:42.7.13'
+    implementation "com.oracle.database.jdbc:ojdbc8:19.27.0.0"
+    
+    testImplementation libs.junit.jupiter
+    testImplementation 'org.apache.groovy:groovy:4.0.29'
+    testImplementation 'org.apache.groovy:groovy-json:4.0.29'
+    testImplementation 'com.sap.cloud.script:script.v2.api:4.1.1'
+
+    testRuntimeOnly "com.sap.cloud.adk:adapter.api:${adapterApiVersion}"
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+tasks.named('compileJava', JavaCompile) {
+    options.release = 8
+    options.encoding = 'UTF-8'
+}
+
+tasks.named('compileTestJava', JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+tasks.named('jar') {
+    enabled = false
+}
+
+tasks.named('shadowJar') {
+    archiveFileName = 'jdbcutil.jar'
+    archiveClassifier = ''
+
+    relocate 'org.postgresql', 'jdbcutil.internal.postgresql'
+
+    dependencies {
+        exclude dependency('org.checkerframework:checker-qual:.*')
+    }
+
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+    exclude 'module-info.class'
+    exclude 'META-INF/versions/**/module-info.class'
+}
+
+tasks.named('build') {
+    dependsOn tasks.named('shadowJar')
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    inputs.file(rootProject.file('iflow/scripts/JDBCUtilEndpoint.groovy'))
+    systemProperty 'jdbcutil.script', rootProject.file('iflow/scripts/JDBCUtilEndpoint.groovy').absolutePath
+}
