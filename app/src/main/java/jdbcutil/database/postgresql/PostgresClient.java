@@ -18,6 +18,7 @@ import java.util.Properties;
 import com.sap.it.api.securestore.UserCredential;
 
 import groovy.json.JsonOutput;
+import jdbcutil.connectivity.socket.ConnectivitySocketFactory;
 import jdbcutil.security.SecureStoreCredentialClient;
 
 public final class PostgresClient {
@@ -25,7 +26,7 @@ public final class PostgresClient {
     private static final int MAX_RESULT_ROWS = 1000;
     private static final String DRIVER_CLASS_NAME = "org.postgresql.Driver";
     private static final String SOCKET_FACTORY_CLASS_NAME =
-            "jdbcutil.database.postgresql.PostgresConnectivitySocketFactory";
+            "jdbcutil.connectivity.socket.ConnectivitySocketFactory";
 
     private PostgresClient() {}
 
@@ -144,7 +145,7 @@ public final class PostgresClient {
 
                 connection.commit();
                 return results;
-            } catch (Exception exception) {
+            } catch (SQLException exception) {
                 rollback(connection, exception);
                 throw exception;
             }
@@ -202,7 +203,7 @@ public final class PostgresClient {
         properties.setProperty("socketFactory", SOCKET_FACTORY_CLASS_NAME);
         properties.setProperty(
                 "socketFactoryArg",
-                PostgresConnectivitySocketFactory.createArgument(
+                ConnectivitySocketFactory.createArgument(
                         connectivityCredentialName,
                         locationId));
         properties.setProperty("classLoaderStrategy", "context-first");

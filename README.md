@@ -184,7 +184,8 @@ Message processData(Message message) {
         message.getBody(String)
     )
 
-    String result = JDBCUtil.executePostgres(
+    String result = JDBCUtil.execute(
+        request.databaseType as String,
         request.connectivityCredentialName as String,
         request.databaseCredentialName as String,
         request.targetHost as String,
@@ -204,6 +205,7 @@ Message processData(Message message) {
 
 ```json
 {
+  "databaseType": "POSTGRESQL",
   "connectivityCredentialName": "ConnectivityProxy",
   "databaseCredentialName": "PostgresCredential",
   "targetHost": "virtual-postgres.example",

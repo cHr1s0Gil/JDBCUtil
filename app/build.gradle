@@ -27,16 +27,12 @@ dependencies {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
 tasks.named('compileJava', JavaCompile) {
     options.release = 8
-    options.encoding = 'UTF-8'
-}
-
-tasks.named('compileTestJava', JavaCompile) {
     options.encoding = 'UTF-8'
 }
 

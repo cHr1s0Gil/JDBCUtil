@@ -14,7 +14,8 @@ import jdbcutil.model.OnPremiseTargetInfo;
 public final class Socks5Client {
     private static final int DEFAULT_TIMEOUT_MILLIS = 10000;
 
-    private Socks5Client() {}
+    private Socks5Client() {
+    }
 
     public static String connectionTest(
             ConnectivityProxyInfo proxyInfo,
@@ -22,6 +23,9 @@ public final class Socks5Client {
             String jwt,
             String locationId) throws IOException {
         try (Socket socket = openSocket(proxyInfo, targetInfo, jwt, locationId)) {
+            if (!socket.isConnected() || socket.isClosed()) {
+                throw new IOException("Socket connection failed.");
+            }
             return "Connection Success";
         }
     }

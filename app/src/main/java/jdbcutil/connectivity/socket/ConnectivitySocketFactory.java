@@ -1,4 +1,4 @@
-package jdbcutil.database.postgresql;
+package jdbcutil.connectivity.socket;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -18,17 +18,17 @@ import jdbcutil.connectivity.Socks5Client;
 import jdbcutil.model.ConnectivityProxyInfo;
 import jdbcutil.model.OnPremiseTargetInfo;
 
-public final class PostgresConnectivitySocketFactory extends SocketFactory {
+public final class ConnectivitySocketFactory extends SocketFactory {
     private static final int DEFAULT_TIMEOUT_MILLIS = 10000;
 
     private final String connectivityCredentialName;
     private final String locationId;
 
-    public PostgresConnectivitySocketFactory() {
+    public ConnectivitySocketFactory() {
         throw new IllegalArgumentException("socketFactoryArg is required.");
     }
 
-    public PostgresConnectivitySocketFactory(String argument) {
+    public ConnectivitySocketFactory(String argument) {
         String[] values = argument == null ? new String[0] : argument.split("\\.", -1);
         if (values.length != 2) {
             throw new IllegalArgumentException("Invalid socketFactoryArg.");
@@ -52,6 +52,21 @@ public final class PostgresConnectivitySocketFactory extends SocketFactory {
         }
 
         return encode(connectivityCredentialName) + "." + encode(locationId == null ? "" : locationId);
+    }
+
+    public static Socket openTunnel(
+            String connectivityCredentialName,
+            String locationId,
+            String targetHost,
+            int targetPort,
+            int timeoutMillis) throws IOException {
+        ConnectivitySocketFactory factory = new ConnectivitySocketFactory(
+                createArgument(connectivityCredentialName, locationId));
+        Socket socket = factory.createSocket();
+        socket.connect(
+                InetSocketAddress.createUnresolved(targetHost, targetPort),
+                timeoutMillis);
+        return socket;
     }
 
     @Override
@@ -124,7 +139,7 @@ public final class PostgresConnectivitySocketFactory extends SocketFactory {
         @Override
         public void connect(SocketAddress endpoint, int timeout) throws IOException {
             if (!(endpoint instanceof InetSocketAddress)) {
-                throw new IOException("PostgreSQL target must be an InetSocketAddress.");
+                throw new IOException("Database target must be an InetSocketAddress.");
             }
             if (isConnected()) {
                 throw new IOException("Socket is already connected.");
@@ -160,7 +175,7 @@ public final class PostgresConnectivitySocketFactory extends SocketFactory {
                 if (exception instanceof IOException) {
                     throw (IOException) exception;
                 }
-                throw new IOException("Failed to create an SCC tunnel for PostgreSQL.", exception);
+                throw new IOException("Failed to create an SCC tunnel.", exception);
             }
         }
 
